@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.model_selection import KFold
 from typing import Dict
-from model_builder import ModelBuilder
+from src.model_builder import ModelBuilder
 
 class CrossValidator:
     """Clase para gestionar la validación cruzada del modelo utilizando K-Fold.

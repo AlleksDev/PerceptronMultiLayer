@@ -2,8 +2,8 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Reduce TensorFlow logging (warnings e info)
 
 from typing import List
-from model_builder import ModelBuilder
-from cross_validator import CrossValidator
+from src.model_builder import ModelBuilder
+from src.cross_validator import CrossValidator
 from data.data_generator import generate_synthetic_dataset
 
 if __name__ == "__main__":
