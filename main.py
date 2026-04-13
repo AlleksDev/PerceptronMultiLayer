@@ -12,9 +12,15 @@ if __name__ == "__main__":
     # 1. Parámetros Construcción (Arquitectura)
     # ---------------------------------------------
     input_dim: int = 10
-    output_dim: int = 1
-    layers_config: List[int] = [64, 32]
-    activations: List[str] = ['relu', 'relu']
+    output_dim: int = 3 # 3 clases: Store, Online, Hybrid
+    layers_config: List[int] = [16]
+    activations: List[str] = ['relu']
+    
+    # Parámetros adicionales para clasificación
+    output_activation: str = 'softmax'
+    loss_function: str = 'sparse_categorical_crossentropy'
+    metrics: List[str] = ['accuracy']
+    
     dataset_size: int = 1000
     
     # ---------------------------------------------
@@ -39,6 +45,9 @@ if __name__ == "__main__":
     # 3. Carga del Dataset Real
     # ---------------------------------------------
     X_real, y_real = load_dataset()
+    
+    # Reducimos las características a solo 6 para la capa de entrada
+    X_real = X_real[:, :6]
     input_dim = X_real.shape[1]
     
     # ---------------------------------------------
@@ -49,7 +58,10 @@ if __name__ == "__main__":
         input_dim=input_dim,
         output_dim=output_dim,
         layers_config=layers_config,
-        activations=activations
+        activations=activations,
+        output_activation=output_activation,
+        loss=loss_function,
+        metrics=metrics
     )
     
     print("[Visualización de la Arquitectura Inicializando un modelo base]")
@@ -75,12 +87,12 @@ if __name__ == "__main__":
     best_hist = final_metrics.get("best_history")
     if best_hist:
         plt.figure(figsize=(10, 6))
-        plt.plot(best_hist['loss'], label='MSE Entrenamiento (Train)')
+        plt.plot(best_hist['loss'], label='Loss Entrenamiento')
         if 'val_loss' in best_hist:
-            plt.plot(best_hist['val_loss'], label='MSE Validación (Val)')
-        plt.title('Evolución del Error (MSE) - Mejor Fold de Validación Cruzada')
+            plt.plot(best_hist['val_loss'], label='Loss Validación')
+        plt.title('Evolución del Error - Mejor Entrenamiento')
         plt.xlabel('Época')
-        plt.ylabel('Error Cuadrático Medio (MSE)')
+        plt.ylabel('Pérdida (Sparse Categorical Crossentropy)')
         plt.legend()
         plt.grid(True)
         plt.show()

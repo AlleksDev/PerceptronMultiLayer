@@ -24,7 +24,7 @@ def load_dataset(csv_path: str = None) -> Tuple[np.ndarray, np.ndarray]:
     # Mapeos para transformar valores de texto a numéricos
     gender_map = {'Male': 1, 'Female': 2, 'Other': 3}
     city_tier_map = {'Tier 1': 1, 'Tier 2': 2, 'Tier 3': 3}
-    shopping_pref_map = {'Store': 1, 'Online': 2, 'Hybrid': 3}
+    shopping_pref_map = {'Store': 0, 'Online': 1, 'Hybrid': 2} # 0-indexed for classification
 
     # Aplicar los mapeos
     df['gender'] = df['gender'].map(gender_map)

@@ -150,6 +150,8 @@ class CrossValidator:
             
             # Calcular error ponderado del fold (total_obs_train_fold * loss_train + total_obs_val_fold * loss_val) / total_fold_obs
             fold_total_error = (n_train * loss_train + n_val * loss_val) / (n_train + n_val)
+            print(f"  -> Error Total (Ponderado) en Fold {iteration}: {fold_total_error:.4f}")
+            
             if fold_total_error < best_fold_error:
                 best_fold_error = fold_total_error
                 best_history = history.history
