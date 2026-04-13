@@ -2,9 +2,10 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Reduce TensorFlow logging (warnings e info)
 
 from typing import List
+import matplotlib.pyplot as plt
 from src.model_builder import ModelBuilder
 from src.cross_validator import CrossValidator
-from data.data_generator import generate_synthetic_dataset
+from data.data_generator import load_dataset
 
 if __name__ == "__main__":
     # ---------------------------------------------
@@ -35,10 +36,11 @@ if __name__ == "__main__":
     print("========================================\n")
     
     # ---------------------------------------------
-    # 3. Generación de Datos Sintéticos para Regresión
+    # 3. Carga del Dataset Real
     # ---------------------------------------------
-    X_synthetic, y_synthetic = generate_synthetic_dataset(dataset_size=dataset_size, input_dim=input_dim)
-
+    X_real, y_real = load_dataset()
+    input_dim = X_real.shape[1]
+    
     # ---------------------------------------------
     # 4. Inyección de Dependencias
     # ---------------------------------------------
@@ -61,9 +63,25 @@ if __name__ == "__main__":
     validator = CrossValidator(builder=builder, n_splits=n_splits)
     
     final_metrics = validator.evaluate(
-        X=X_synthetic, 
-        y=y_synthetic, 
+        X=X_real, 
+        y=y_real, 
         epochs=15, 
         batch_size=32
     )
+
+    # ---------------------------------------------
+    # 6. Visualización de la evolución del error
+    # ---------------------------------------------
+    best_hist = final_metrics.get("best_history")
+    if best_hist:
+        plt.figure(figsize=(10, 6))
+        plt.plot(best_hist['loss'], label='MSE Entrenamiento (Train)')
+        if 'val_loss' in best_hist:
+            plt.plot(best_hist['val_loss'], label='MSE Validación (Val)')
+        plt.title('Evolución del Error (MSE) - Mejor Fold de Validación Cruzada')
+        plt.xlabel('Época')
+        plt.ylabel('Error Cuadrático Medio (MSE)')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
 

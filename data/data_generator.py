@@ -1,24 +1,43 @@
 import numpy as np
+import pandas as pd
+import os
 from typing import Tuple
 
-def generate_synthetic_dataset(dataset_size: int, input_dim: int) -> Tuple[np.ndarray, np.ndarray]:
+def load_dataset(csv_path: str = None) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Genera un conjunto de datos sintético para tareas de regresión.
-    La variable objetivo (y) se crea a partir de las primeras 3 características
-    sumándole ruido gaussiano para que el modelo tenga un patrón real que encontrar.
+    Carga el dataset desde el archivo CSV y convierte los valores categóricos a numéricos.
 
     Args:
-        dataset_size (int): Cantidad de muestras a generar.
-        input_dim (int): Número de dimensiones/características por muestra.
+        csv_path (str, optional): Ruta al archivo CSV. Por defecto asume que está en el mismo directorio.
 
     Returns:
         Tuple[np.ndarray, np.ndarray]: (X, y) donde X son las características y y es la variable a predecir.
     """
-    # X son números aleatorios entre 0 y 1 uniformes
-    X = np.random.rand(dataset_size, input_dim).astype(np.float32)
-    
-    # y = sumatoria de características 0,1,2 * 2 + ruido aleatorio con distribución normal
-    y = (np.sum(X[:, :3], axis=1, keepdims=True) * 2.0 + 
-         np.random.normal(0, 0.1, (dataset_size, 1))).astype(np.float32)
+    if csv_path is None:
+        # Por defecto, busca en el mismo directorio donde está este script
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        csv_path = os.path.join(current_dir, 'Consumer_Shopping_Trends_2026.csv')
+
+    # Leer el archivo CSV
+    df = pd.read_csv(csv_path)
+
+    # Mapeos para transformar valores de texto a numéricos
+    gender_map = {'Male': 1, 'Female': 2, 'Other': 3}
+    city_tier_map = {'Tier 1': 1, 'Tier 2': 2, 'Tier 3': 3}
+    shopping_pref_map = {'Store': 1, 'Online': 2, 'Hybrid': 3}
+
+    # Aplicar los mapeos
+    df['gender'] = df['gender'].map(gender_map)
+    df['city_tier'] = df['city_tier'].map(city_tier_map)
+    df['shopping_preference'] = df['shopping_preference'].map(shopping_pref_map)
+
+    # Llenar posibles datos faltantes con 0 (o el valor que prefieras)
+    df.fillna(0, inplace=True)
+
+    # Separar en características (X) y la variable objetivo (y)
+    # Suponiendo que queremos predecir la última columna ('shopping_preference')
+    X = df.iloc[:, :-1].values.astype(np.float32)
+    y = df.iloc[:, -1:].values.astype(np.float32)
          
     return X, y
+

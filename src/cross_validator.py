@@ -97,6 +97,10 @@ class CrossValidator:
         fold_val_losses = []
         fold_train_losses = []
         
+        # Variables para rastrear el mejor modelo según el error ponderado del fold
+        best_fold_error = float('inf')
+        best_history = None
+
         # Contadores globales de observaciones
         total_obs_train = 0
         total_obs_val = 0
@@ -127,8 +131,9 @@ class CrossValidator:
             print(f"  -> Entrenando: {n_train} muestras | Validando: {n_val} muestras")
             
             # Entrenamiento silencioso (verbose=0)
-            model.fit(
+            history = model.fit(
                 X_train, y_train,
+                validation_data=(X_val, y_val),
                 epochs=epochs,
                 batch_size=batch_size,
                 verbose=0
@@ -142,6 +147,12 @@ class CrossValidator:
             loss_val = val_results[0] if isinstance(val_results, list) else val_results
             
             print(f"  -> Train MSE (Loss): {loss_train:.4f} | Val MSE (Loss): {loss_val:.4f}")
+            
+            # Calcular error ponderado del fold (total_obs_train_fold * loss_train + total_obs_val_fold * loss_val) / total_fold_obs
+            fold_total_error = (n_train * loss_train + n_val * loss_val) / (n_train + n_val)
+            if fold_total_error < best_fold_error:
+                best_fold_error = fold_total_error
+                best_history = history.history
             
             fold_train_losses.append(loss_train)
             fold_val_losses.append(loss_val)
@@ -169,5 +180,6 @@ class CrossValidator:
         
         return {
             "mean_loss": mean_error_val, # Compatible con implementaciones antiguas
-            "error_total": error_total_sistema
+            "error_total": error_total_sistema,
+            "best_history": best_history
         }
